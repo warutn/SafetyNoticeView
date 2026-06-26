@@ -1,4 +1,3 @@
-<script>
 /**
  * Thai AirAsia Data Table Web App
  * Frontend Logic
@@ -143,4 +142,3 @@ function showError(msg) {
   const container = document.getElementById('table-body');
   container.innerHTML = `<tr><td colspan="100%" style="text-align:center; padding: 40px; color: var(--airasia-red);">Error: ${msg}</td></tr>`;
 }
-<script>
