@@ -1,5 +1,4 @@
-<style>
-  /* Thai AirAsia Style Sheet */
+/* Thai AirAsia Style Sheet */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
 
 :root {
@@ -201,4 +200,3 @@ tr:hover td {
 
 .status-active { background: #E8F5E9; color: #2E7D32; }
 .status-pending { background: #FFF3E0; color: #EF6C00; }
-</style>
