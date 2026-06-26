@@ -2,8 +2,8 @@
  * Thai AirAsia Data Table - GitHub Pages Version
  */
 
-// 1. นำลิงก์ CSV จาก Google Sheets มาใส่ตรงนี้ (เดี๋ยวผมสอนวิธีเอาลิงก์ครับ)
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS731D6A7mY8L1E6fS2z6_z79Z3N5_Kx1Hj0p_v-oY4k/pub?output=csv';
+// ลิงก์ข้อมูล CSV ที่คุณเพิ่งส่งมา
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS981I5BC7V0X9Q6VuuSz4eX2TPfnPb3hAJ4GELCYO814fDkbSax2cvIxwUkX_TE2uOBtX_k0SO3rMs/pub?gid=1351206040&single=true&output=csv';
 
 let allData = [];
 
@@ -24,20 +24,117 @@ async function fetchData() {
     renderTable(allData);
   } catch (error) {
     console.error('Error:', error);
-    showError('Cannot fetch data. Please check "Publish to Web" settings.');
+    showError('ไม่สามารถโหลดข้อมูลได้ โปรดตรวจสอบการตั้งค่า Publish to Web ใน Google Sheets');
   }
 }
 
-// ฟังก์ชันแปลง CSV เป็น JSON แบบง่าย
 function parseCSV(csv) {
-  const lines = csv.split('\n');
-  const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/\s+/g, '_'));
-  return lines.slice(1).map(line => {
-    const values = line.split(',');
-    let obj = {};
-    headers.forEach((header, i) => obj[header] = values[i]);
-    return obj;
+    const lines = csv.split(/\r?\n/);
+    if (lines.length < 2) return [];
+    
+    // แยก Header (แถวแรก)
+    const headers = lines[0].split(',').map(h => h.trim());
+    
+    return lines.slice(1).filter(line => line.trim() !== "").map(line => {
+        // ใช้เทคนิคแยก Comma ที่ซับซ้อนขึ้นเพื่อรองรับข้อมูลที่มีเครื่องหมายอัญประกาศ
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        for (let char of line) {
+            if (char === '"') inQuotes = !inQuotes;
+            else if (char === ',' && !inQuotes) {
+                values.push(current.trim());
+                current = '';
+            } else current += char;
+        }
+        values.push(current.trim());
+
+        let obj = {};
+        headers.forEach((header, i) => {
+            let val = values[i] ? values[i].replace(/^"|"$/g, '') : "";
+            obj[header] = val;
+        });
+        return obj;
+    });
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('table-body');
+  const loader = document.getElementById('loader');
+  if (loader) loader.style.display = 'none';
+  tbody.innerHTML = '';
+
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="100%" style="text-align:center; padding: 40px;">ไม่พบข้อมูล</td></tr>';
+    return;
+  }
+
+  data.forEach(row => {
+    const tr = document.createElement('tr');
+    
+    Object.keys(row).forEach(key => {
+      const td = document.createElement('td');
+      let content = row[key];
+
+      // ตรวจสอบลิงก์ PDF/Google Drive
+      if (content && (content.includes('http') && (content.toLowerCase().includes('pdf') || content.includes('drive.google.com')))) {
+        td.innerHTML = `
+          <a href="${content}" target="_blank" class="pdf-link" 
+             onmouseover="showPreview(event, '${content}')" 
+             onmouseout="hidePreview()">
+            <svg class="pdf-icon" viewBox="0 0 24 24" style="width:18px; fill:#E11A22; vertical-align:middle; margin-right:5px;"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5z"/></svg>
+            เปิดไฟล์
+          </a>
+        `;
+      } else {
+        td.textContent = content;
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
   });
 }
 
-// ... ส่วนที่เหลือ (renderTable, showPreview, hidePreview) ใช้ของเดิมได้เลยครับ ...
+function filterData(query) {
+  const filtered = allData.filter(row => {
+    return Object.values(row).some(val => 
+      String(val).toLowerCase().includes(query.toLowerCase())
+    );
+  });
+  renderTable(filtered);
+}
+
+function showPreview(event, url) {
+  const preview = document.getElementById('pdf-preview');
+  const iframe = preview.querySelector('iframe');
+  let previewUrl = url;
+  
+  if (url.includes('drive.google.com')) {
+    previewUrl = url.replace('/view?usp=sharing', '/preview').replace('/view', '/preview');
+  }
+
+  iframe.src = previewUrl;
+  preview.style.display = 'block';
+  updatePreviewPosition(event);
+}
+
+function updatePreviewPosition(event) {
+  const preview = document.getElementById('pdf-preview');
+  const x = event.clientX + 20;
+  const y = event.clientY - 250;
+  const maxX = window.innerWidth - preview.offsetWidth - 20;
+  const maxY = window.innerHeight - preview.offsetHeight - 20;
+  preview.style.left = Math.min(x, maxX) + 'px';
+  preview.style.top = Math.max(20, Math.min(y, maxY)) + 'px';
+}
+
+function hidePreview() {
+  const preview = document.getElementById('pdf-preview');
+  preview.style.display = 'none';
+  preview.querySelector('iframe').src = '';
+}
+
+function showError(msg) {
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = `<tr><td colspan="100%" style="text-align:center; padding: 40px; color: #E11A22;">${msg}</td></tr>`;
+}
