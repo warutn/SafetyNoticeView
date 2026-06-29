@@ -1,50 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
   <head>
     <base target="_top">
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RAMP SAFETY NOTICE - Thai AirAsia</title>
-  <link rel="stylesheet" href="style.css">
+    <!-- ดึงไฟล์ style.html มาใช้งาน -->
+    <?!= include('style'); ?>
   </head>
   <body>
     <div class="container">
       <header>
-        <div>
-          <h1>RAMP SAFETY NOTICE</h1>
-          <p style="font-size: 0.85rem; color: #666; margin-top: 4px;">Thai AirAsia Operations Dashboard</p>
+        <div class="header-content">
+          <div class="logo-area">
+             <!-- ส่วนนี้สามารถใส่โลโก้ได้ในอนาคต -->
+             <div class="brand-line"></div>
+          </div>
+          <div class="title-area">
+            <h1>RAMP SAFETY NOTICE</h1>
+            <p class="subtitle">Thai AirAsia Operations Dashboard</p>
+          </div>
         </div>
         <div class="search-container">
-          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input type="text" id="search-input" placeholder="Search notices...">
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="search-input" placeholder="ค้นหาข้อมูลประกาศความปลอดภัย...">
         </div>
       </header>
 
       <div class="table-wrapper">
-        <table>
+        <table id="data-table">
           <thead>
             <tr id="table-header">
-              <!-- Headers will be populated dynamically if needed, 
-                   or handled by script.js row mapping -->
+              <!-- หัวตารางจะถูกสร้างโดยอัตโนมัติจาก script -->
             </tr>
           </thead>
           <tbody id="table-body">
-            <!-- Data will be loaded here -->
+            <!-- ข้อมูลจะถูกโหลดมาใส่ที่นี่ -->
           </tbody>
         </table>
         
+        <!-- ส่วนแสดงสถานะการโหลด -->
         <div id="loader" class="loader-container">
           <div class="spinner"></div>
-          <p style="margin-top: 16px; color: #666; font-size: 0.9rem;">Fetching latest data...</p>
+          <p>กำลังดึงข้อมูลล่าสุดจากระบบ...</p>
         </div>
       </div>
     </div>
 
-    <!-- PDF Preview Popup -->
+    <!-- หน้าต่างลอยแสดงตัวอย่างไฟล์ PDF (Floating Preview) -->
     <div id="pdf-preview">
-      <iframe src=""></iframe>
+      <div class="preview-header">
+        <span>ตัวอย่างไฟล์ (Preview)</span>
+      </div>
+      <iframe src="" frameborder="0"></iframe>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
-    <script src="script.js"></script>
+    <!-- ดึงไฟล์ script.html มาใช้งาน -->
+    <?!= include('script'); ?>
   </body>
 </html>
